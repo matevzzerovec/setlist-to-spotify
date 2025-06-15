@@ -1,12 +1,20 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { SpotifyService } from './spotify.service';
 
-@Controller()
+@Controller('spotify')
 export class SpotifyController {
-  constructor(private readonly SpotifyService: SpotifyService) {}
+  constructor(private readonly spotifyService: SpotifyService) {}
 
-  @Get()
-  getHello(): string {
-    return this.SpotifyService.getSpotify();
+  @Get('login')
+  login(@Res() res: Response) {
+    const authUrl = this.spotifyService.buildAuthUrl();
+    return res.redirect(authUrl);
+  }
+
+  @Get('callback')
+  async callback(@Query('code') code: string) {
+    const tokenData = await this.spotifyService.exchangeCodeForToken(code);
+    return tokenData;
   }
 }
