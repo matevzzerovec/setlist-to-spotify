@@ -7,6 +7,8 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { SpotifyService } from './spotify.service';
@@ -18,8 +20,13 @@ export class SpotifyController {
 
   @Get('login')
   login(@Res() res: Response) {
-    const authUrl = this.spotifyService.buildAuthUrl();
-    return res.redirect(authUrl);
+    try {
+      const authUrl = this.spotifyService.buildAuthUrl();
+      return res.redirect(authUrl);
+    } catch (err) {
+      console.error('Login redirect error:', err);
+      throw new InternalServerErrorException('Could not redirect to login');
+    }
   }
 
   @Get('callback')
@@ -27,25 +34,33 @@ export class SpotifyController {
     @Query('code') code: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const tokenData = await this.spotifyService.exchangeCodeForToken(code);
+    try {
+      if (!code) throw new BadRequestException('Missing Spotify code');
 
-    const userId = await this.spotifyService.getUserId(tokenData.access_token);
+      const tokenData = await this.spotifyService.exchangeCodeForToken(code);
+      const userId = await this.spotifyService.getUserId(
+        tokenData.access_token,
+      );
 
-    res.cookie('access_token', tokenData.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // HTTPS in prod only
-      sameSite: 'lax',
-      maxAge: tokenData.expires_in * 1000,
-    });
+      res.cookie('access_token', tokenData.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: tokenData.expires_in * 1000,
+      });
 
-    res.cookie('user_id', userId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: tokenData.expires_in * 1000,
-    });
+      res.cookie('user_id', userId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: tokenData.expires_in * 1000,
+      });
 
-    return { success: true };
+      return { success: true };
+    } catch (err) {
+      console.error('Spotify callback error:', err);
+      throw new InternalServerErrorException('Spotify authentication failed');
+    }
   }
 
   @Post('create-playlist')
@@ -53,15 +68,22 @@ export class SpotifyController {
     @Req() req: Request,
     @Body() requestBody: CreatePlaylistDto,
   ) {
-    const token = req.cookies['access_token'];
-    const userId = req.cookies['user_id'];
+    const token = req.cookies?.['access_token'];
+    const userId = req.cookies?.['user_id'];
 
-    if (!token || !userId)
+    if (!token || !userId) {
       throw new UnauthorizedException('User is unauthorized.');
+    }
 
-    return {
-      link: requestBody.setlistFmLink,
-      name: requestBody.playlistName,
-    };
+    try {
+      // Temporary mock response
+      return {
+        link: requestBody.setlistFmLink,
+        name: requestBody.playlistName,
+      };
+    } catch (err) {
+      console.error('Create playlist error:', err);
+      throw new InternalServerErrorException('Could not create playlist');
+    }
   }
 }
