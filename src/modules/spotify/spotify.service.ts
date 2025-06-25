@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import * as querystring from 'querystring';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
+import { CreatePlaylistDto } from '../../dto/create-playlist-dto';
+import { getuid } from 'process';
 
 @Injectable()
 export class SpotifyService {
@@ -50,4 +52,24 @@ export class SpotifyService {
     const response = await axios(authOptions);
     return response.data;
   }
+
+  async getUserId(accessToken: string) {
+    const authOptions = {
+      url: 'https://api.spotify.com/v1/me',
+      method: 'get',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    };
+
+    const response = await axios(authOptions);
+
+    return response.data.id;
+  }
+
+  async createPlaylist(userId: string) {
+    const user = this.getUser();
+  }
+
+  private getUser() {}
 }
