@@ -76,7 +76,13 @@ export class SpotifyController {
     }
 
     try {
-      // Temporary mock response
+      const playlist = this.spotifyService.buildPlaylist(
+        requestBody.playlistName,
+        requestBody.setlistFmLink,
+        token,
+        userId,
+      );
+
       return {
         link: requestBody.setlistFmLink,
         name: requestBody.playlistName,
