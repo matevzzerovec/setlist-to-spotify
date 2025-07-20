@@ -76,7 +76,7 @@ export class SpotifyController {
     }
 
     try {
-      const playlist = this.spotifyService.buildPlaylist(
+      const playlist = await this.spotifyService.buildPlaylist(
         requestBody.playlistName,
         requestBody.setlistFmLink,
         token,
@@ -84,8 +84,7 @@ export class SpotifyController {
       );
 
       return {
-        link: requestBody.setlistFmLink,
-        name: requestBody.playlistName,
+        neki: 'Whattt',
       };
     } catch (err) {
       console.error('Create playlist error:', err);

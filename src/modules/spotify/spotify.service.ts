@@ -77,7 +77,7 @@ export class SpotifyService {
     accessToken: any,
     userId: any,
   ) {
-    const { artist, songs } =
-      await this.setlistFmService.parseSetlistFromUrl(setlistFmLink);
+    const ParsedSetlist =
+      await this.setlistFmService.parseSetlistVersion4o(setlistFmLink);
   }
 }
