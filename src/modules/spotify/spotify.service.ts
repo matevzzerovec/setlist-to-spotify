@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { CreatePlaylistDto } from '../../dto/create-playlist-dto';
 import { getuid } from 'process';
-import { SetlistFmService } from '../setlist-fm/setlist-fm.service';
+import { SetlistParserService } from '../setlist-parser/setlist-parser.service';
 
 @Injectable()
 export class SpotifyService {
@@ -13,7 +13,7 @@ export class SpotifyService {
   private redirectUri: string;
 
   constructor(
-    private readonly setlistFmService: SetlistFmService,
+    private readonly setlistFmService: SetlistParserService,
     private readonly configService: ConfigService,
   ) {
     this.clientId = this.configService.get('SPOTIFY_CLIENT_ID')!;

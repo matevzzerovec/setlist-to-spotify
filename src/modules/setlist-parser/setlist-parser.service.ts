@@ -3,10 +3,11 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 
 @Injectable()
-export class SetlistFmService {
+export class SetlistParserService {
   async parseSetlistFromUrl(
     url: string,
   ): Promise<{ artist: string; songs: string[] }> {
+
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
 
