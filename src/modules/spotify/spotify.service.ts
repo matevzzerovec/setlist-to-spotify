@@ -78,6 +78,6 @@ export class SpotifyService {
     userId: any,
   ) {
     const ParsedSetlist =
-      await this.setlistFmService.parseSetlistVersion4o(setlistFmLink);
+      await this.setlistFmService.parseSetlistHtml(setlistFmLink);
   }
 }
