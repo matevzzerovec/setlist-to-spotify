@@ -30,17 +30,12 @@ export class SpotifyController {
   }
 
   @Get('callback')
-  async callback(
-    @Query('code') code: string,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async callback(@Query('code') code: string, @Res({ passthrough: true }) res: Response) {
     try {
       if (!code) throw new BadRequestException('Missing Spotify code');
 
       const tokenData = await this.spotifyService.exchangeCodeForToken(code);
-      const userId = await this.spotifyService.getUserId(
-        tokenData.access_token,
-      );
+      const userId = await this.spotifyService.getUserId(tokenData.access_token);
 
       res.cookie('access_token', tokenData.access_token, {
         httpOnly: true,
@@ -64,10 +59,9 @@ export class SpotifyController {
   }
 
   @Post('create-playlist')
-  async createPlaylist(
-    @Req() req: Request,
-    @Body() requestBody: CreatePlaylistDto,
-  ) {
+  async createPlaylist(@Req() req: Request, @Body() requestBody: CreatePlaylistDto) {
+    console.log('Create playlist called: ', req.cookies?.['user_id'], requestBody.setlistFmLink);
+
     const token = req.cookies?.['access_token'];
     const userId = req.cookies?.['user_id'];
 
@@ -76,16 +70,12 @@ export class SpotifyController {
     }
 
     try {
-      const playlist = await this.spotifyService.buildPlaylist(
+      return await this.spotifyService.buildPlaylist(
         requestBody.playlistName,
         requestBody.setlistFmLink,
         token,
         userId,
       );
-
-      return {
-        neki: 'Whattt',
-      };
     } catch (err) {
       console.error('Create playlist error:', err);
       throw new InternalServerErrorException('Could not create playlist');
